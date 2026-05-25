@@ -8,8 +8,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
-<script src="https://unpkg.com/gsap@3.12.5/dist/gsap.min.js"></script>
 <style>
   /* ============================================
      COUNTDOWN TO MATERNITY LEAVE
@@ -521,15 +519,17 @@
       linear-gradient(180deg, rgba(255,255,255,0.55), rgba(244,215,205,0.25));
     border: 1px solid var(--line);
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  .fruit-canvas {
-    width: 100%;
-    height: 100%;
-    display: block;
-    touch-action: none;
-    cursor: grab;
+  .fruit-emoji {
+    font-size: clamp(96px, 28vw, 150px);
+    line-height: 1;
+    filter: drop-shadow(0 14px 20px rgba(42,37,32,0.22));
+    animation: floatY 4s ease-in-out infinite;
+    user-select: none;
   }
-  .fruit-canvas:active { cursor: grabbing; }
   .fruit-3d .fruit-week-pill {
     position: absolute;
     top: 8px;
@@ -537,13 +537,13 @@
     pointer-events: none;
     background: rgba(255,255,255,0.85);
   }
-  .treat-canvas {
-    width: 64px;
-    height: 64px;
+  .fruit-treat-icon {
+    font-size: clamp(64px, 14vw, 84px);
+    line-height: 1;
     flex-shrink: 0;
-    cursor: pointer;
-    border-radius: 12px;
-    background: rgba(255,255,255,0.5);
+    filter: drop-shadow(0 8px 12px rgba(42,37,32,0.2));
+    animation: floatY 4.6s ease-in-out infinite;
+    user-select: none;
   }
   .fruit-meta { display: flex; flex-direction: column; gap: 10px; }
   .fruit-week-pill {
@@ -573,11 +573,6 @@
     border: 1px solid var(--line);
     border-radius: 14px;
     padding: 10px 12px;
-  }
-  .fruit-treat-icon {
-    font-size: 32px;
-    line-height: 1;
-    flex-shrink: 0;
   }
   .fruit-treat-label {
     font-size: 9px;
@@ -658,15 +653,6 @@
     background: rgba(253,248,239,1);
     border-color: var(--accent);
   }
-  .fruit-note {
-    text-align: center;
-    margin-top: 10px;
-    font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-size: 12px;
-    color: var(--ink-soft);
-  }
-
   @keyframes floatY {
     0%, 100% { transform: translateY(0) rotate(-2deg); }
     50%      { transform: translateY(-8px) rotate(2deg); }
@@ -959,13 +945,13 @@
 
     <div class="fruit-feature" id="fruitFeature">
       <div class="fruit-3d">
-        <canvas id="fruitCanvas" class="fruit-canvas" aria-label="3D fruit model"></canvas>
+        <div class="fruit-emoji" id="fruitEmoji">🌱</div>
         <div class="fruit-week-pill"><span id="fruitWeekNum">—</span> · week</div>
       </div>
       <div class="fruit-meta">
         <div class="fruit-size" id="fruitSize">—</div>
         <div class="fruit-treat">
-          <canvas id="treatCanvas" class="treat-canvas" aria-label="3D treat model"></canvas>
+          <span class="fruit-treat-icon" id="fruitTreatEmoji">🥄</span>
           <div>
             <div class="fruit-treat-label">treat of the week</div>
             <div class="fruit-treat-name" id="fruitTreat">—</div>
@@ -977,7 +963,6 @@
     <div class="fruit-strip-wrap">
       <div class="fruit-strip" id="fruitStrip" role="listbox" aria-label="All 40 weeks"></div>
     </div>
-    <div class="fruit-note">— a fruit a week, all the way to <strong>Vlada</strong> —</div>
   </section>
 
   <div class="note">
@@ -1303,259 +1288,9 @@
     return best;
   }
 
-  // ========== 3D SCENE BUILDERS ==========
-  function makeMiniScene(canvas, opts = {}) {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 50);
-    camera.position.set(0, 0.4, 4.6);
-    camera.lookAt(0, 0, 0);
-    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    function resize() {
-      const r = canvas.getBoundingClientRect();
-      renderer.setSize(r.width, r.height, false);
-      camera.aspect = r.width / Math.max(r.height, 1);
-      camera.updateProjectionMatrix();
-    }
-    resize();
-    new ResizeObserver(resize).observe(canvas);
-    scene.add(new THREE.HemisphereLight(0xfff3e0, 0xc9a89a, 1.0));
-    const key = new THREE.DirectionalLight(0xfff1d6, 1.1);
-    key.position.set(2, 3, 3); scene.add(key);
-    const rim = new THREE.PointLight(0xe9b8a7, 0.6, 10);
-    rim.position.set(-2, 1.5, 2); scene.add(rim);
-    const group = new THREE.Group();
-    scene.add(group);
-    function loop() { renderer.render(scene, camera); requestAnimationFrame(loop); }
-    requestAnimationFrame(loop);
-    return { scene, camera, renderer, group };
-  }
-
-  function clearGroup(g) {
-    while (g.children.length) {
-      const c = g.children.pop();
-      c.traverse(n => { if (n.geometry) n.geometry.dispose(); if (n.material) {
-        if (Array.isArray(n.material)) n.material.forEach(m => m.dispose());
-        else n.material.dispose();
-      }});
-    }
-  }
-
-  function fruitMaterial(color) {
-    return new THREE.MeshPhysicalMaterial({
-      color, roughness: 0.55, metalness: 0.05, clearcoat: 0.35, clearcoatRoughness: 0.4,
-    });
-  }
-  function buildFruit(f) {
-    const g = new THREE.Group();
-    const mat = fruitMaterial(f.color);
-    const s = f.scale;
-    if (f.shape === 'sphere') {
-      g.add(new THREE.Mesh(new THREE.SphereGeometry(s, 40, 32), mat));
-    } else if (f.shape === 'oblong') {
-      const m = new THREE.Mesh(new THREE.SphereGeometry(s * 0.78, 40, 32), mat);
-      m.scale.y = 1.45; g.add(m);
-    } else if (f.shape === 'long') {
-      const m = new THREE.Mesh(new THREE.CapsuleGeometry(s * 0.32, s * 1.6, 12, 24), mat);
-      m.rotation.z = Math.PI * 0.18; g.add(m);
-    } else if (f.shape === 'banana') {
-      // curved capsule emulated via two-segment lathe arc
-      const pts = [];
-      for (let i = 0; i <= 12; i++) {
-        const t = i / 12;
-        pts.push(new THREE.Vector2(0.22 + Math.sin(t * Math.PI) * 0.05, (t - 0.5) * 1.6));
-      }
-      const geo = new THREE.LatheGeometry(pts, 28);
-      const m = new THREE.Mesh(geo, mat);
-      m.scale.set(s, s, s); m.rotation.z = Math.PI * 0.2;
-      g.add(m);
-    } else if (f.shape === 'pumpkin') {
-      const m = new THREE.Mesh(new THREE.SphereGeometry(s, 40, 32), mat);
-      m.scale.y = 0.78; g.add(m);
-      // stem
-      const stem = new THREE.Mesh(
-        new THREE.CylinderGeometry(s * 0.08, s * 0.1, s * 0.3, 12),
-        new THREE.MeshStandardMaterial({ color: 0x5b7a3a, roughness: 0.8 })
-      );
-      stem.position.y = s * 0.78; g.add(stem);
-    } else if (f.shape === 'pineapple') {
-      const body = new THREE.Mesh(
-        new THREE.CylinderGeometry(s * 0.65, s * 0.55, s * 1.4, 32),
-        new THREE.MeshPhysicalMaterial({
-          color: f.color, roughness: 0.7, metalness: 0.05,
-          clearcoat: 0.2,
-        })
-      );
-      g.add(body);
-      // crown leaves
-      const leafMat = new THREE.MeshStandardMaterial({ color: 0x4a8b3a, roughness: 0.8 });
-      for (let i = 0; i < 9; i++) {
-        const leaf = new THREE.Mesh(new THREE.ConeGeometry(s * 0.08, s * 0.55, 8), leafMat);
-        const ang = (i / 9) * Math.PI * 2;
-        leaf.position.set(Math.cos(ang) * s * 0.1, s * 0.95, Math.sin(ang) * s * 0.1);
-        leaf.rotation.z = Math.cos(ang) * 0.3;
-        leaf.rotation.x = Math.sin(ang) * 0.3;
-        g.add(leaf);
-      }
-    }
-    g.position.y = -0.05;
-    return g;
-  }
-
-  function buildTreat(t) {
-    const g = new THREE.Group();
-    if (t.shape === 'shake') {
-      const glass = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.45, 0.38, 1.2, 32, 1, true),
-        new THREE.MeshPhysicalMaterial({ color: t.glass, transmission: 0.6,
-          roughness: 0.1, metalness: 0, transparent: true, opacity: 0.55,
-          side: THREE.DoubleSide })
-      );
-      g.add(glass);
-      const liquid = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.42, 0.36, 1.05, 32),
-        new THREE.MeshPhysicalMaterial({ color: t.color, roughness: 0.4, metalness: 0.05 })
-      );
-      liquid.position.y = -0.05; g.add(liquid);
-      const straw = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.04, 0.04, 1.4, 16),
-        new THREE.MeshStandardMaterial({ color: 0xc97b63, roughness: 0.4 })
-      );
-      straw.position.set(0.18, 0.5, 0); straw.rotation.z = 0.16; g.add(straw);
-    } else if (t.shape === 'muffin') {
-      const paper = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.5, 0.35, 0.55, 24),
-        new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.85 })
-      );
-      paper.position.y = -0.2; g.add(paper);
-      const dome = new THREE.Mesh(
-        new THREE.SphereGeometry(0.5, 28, 18, 0, Math.PI * 2, 0, Math.PI / 1.7),
-        new THREE.MeshStandardMaterial({ color: t.top, roughness: 0.7 })
-      );
-      dome.position.y = 0.1; g.add(dome);
-    } else if (t.shape === 'parfait') {
-      const glass = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.42, 0.42, 1.1, 28, 1, true),
-        new THREE.MeshPhysicalMaterial({ color: 0xfdf8ef, transmission: 0.7,
-          roughness: 0.1, transparent: true, opacity: 0.5, side: THREE.DoubleSide })
-      );
-      g.add(glass);
-      const layerA = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.4, 0.4, 0.5, 28),
-        new THREE.MeshStandardMaterial({ color: t.a, roughness: 0.5 })
-      );
-      layerA.position.y = -0.25; g.add(layerA);
-      const layerB = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.4, 0.4, 0.5, 28),
-        new THREE.MeshStandardMaterial({ color: t.b, roughness: 0.5 })
-      );
-      layerB.position.y = 0.25; g.add(layerB);
-    } else if (t.shape === 'popsicle') {
-      const body = new THREE.Mesh(
-        new THREE.BoxGeometry(0.6, 1.0, 0.32),
-        new THREE.MeshPhysicalMaterial({ color: t.color, roughness: 0.4, clearcoat: 0.5 })
-      );
-      body.position.y = 0.15; g.add(body);
-      const stick = new THREE.Mesh(
-        new THREE.BoxGeometry(0.12, 0.6, 0.06),
-        new THREE.MeshStandardMaterial({ color: 0xc99563, roughness: 0.8 })
-      );
-      stick.position.y = -0.55; g.add(stick);
-    } else if (t.shape === 'cone') {
-      const cone = new THREE.Mesh(
-        new THREE.ConeGeometry(0.42, 0.9, 24),
-        new THREE.MeshStandardMaterial({ color: 0xc99563, roughness: 0.8 })
-      );
-      cone.position.y = -0.3; cone.rotation.x = Math.PI; g.add(cone);
-      const scoop = new THREE.Mesh(
-        new THREE.SphereGeometry(0.42, 32, 24),
-        new THREE.MeshPhysicalMaterial({ color: t.color, roughness: 0.5, clearcoat: 0.3 })
-      );
-      scoop.position.y = 0.3; g.add(scoop);
-    } else if (t.shape === 'pancakes') {
-      const mat = new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.7 });
-      for (let i = 0; i < 3; i++) {
-        const p = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.16, 28), mat);
-        p.position.y = -0.4 + i * 0.18; g.add(p);
-      }
-      const syrup = new THREE.Mesh(
-        new THREE.SphereGeometry(0.18, 18, 14, 0, Math.PI * 2, 0, Math.PI / 1.8),
-        new THREE.MeshPhysicalMaterial({ color: 0x8b5a3c, roughness: 0.2, clearcoat: 0.7 })
-      );
-      syrup.position.y = 0.15; g.add(syrup);
-    } else if (t.shape === 'cake') {
-      const mat = new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.7 });
-      g.add(new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.55, 0.9, 30), mat));
-    } else { // bowl
-      const bowl = new THREE.Mesh(
-        new THREE.SphereGeometry(0.6, 36, 24, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2),
-        new THREE.MeshStandardMaterial({ color: t.bowl, roughness: 0.6, side: THREE.DoubleSide })
-      );
-      bowl.position.y = -0.1; g.add(bowl);
-      const fill = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.55, 0.55, 0.08, 30),
-        new THREE.MeshStandardMaterial({ color: t.color, roughness: 0.5 })
-      );
-      fill.position.y = -0.1; g.add(fill);
-    }
-    return g;
-  }
-
-  // ========== FRUIT + TREAT 3D RENDERERS ==========
-  const fruitScene = makeMiniScene(document.getElementById('fruitCanvas'));
-  const treatScene = makeMiniScene(document.getElementById('treatCanvas'));
-  treatScene.camera.position.set(0, 0.3, 3.6);
-  let fruitSpin = null, treatSpin = null;
-
-  function loadWeekIntoScene(week) {
-    clearGroup(fruitScene.group);
-    clearGroup(treatScene.group);
-    const fr = buildFruit(week.f);
-    const tr = buildTreat(week.t);
-    fruitScene.group.add(fr);
-    treatScene.group.add(tr);
-    // GSAP idle rotation + entry pop
-    if (fruitSpin) fruitSpin.kill();
-    if (treatSpin) treatSpin.kill();
-    fr.scale.setScalar(0.001); tr.scale.setScalar(0.001);
-    gsap.to(fr.scale, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'back.out(2)' });
-    gsap.to(tr.scale, { x: 1, y: 1, z: 1, duration: 0.7, ease: 'back.out(2)', delay: 0.1 });
-    if (!reduceMotion) {
-      fruitSpin = gsap.to(fr.rotation, { y: Math.PI * 2, duration: 14, ease: 'none', repeat: -1 });
-      gsap.to(fr.position, { y: 0.06, duration: 2.6, ease: 'sine.inOut', yoyo: true, repeat: -1 });
-      treatSpin = gsap.to(tr.rotation, { y: Math.PI * 2, duration: 10, ease: 'none', repeat: -1 });
-    }
-  }
-
-  // Hover lift via GSAP on each canvas
-  function attachHover(canvas, sceneObj) {
-    canvas.addEventListener('pointerenter', () => {
-      const g = sceneObj.group.children[0];
-      if (g) gsap.to(g.scale, { x: 1.12, y: 1.12, z: 1.12, duration: 0.4, ease: 'back.out(2)' });
-    });
-    canvas.addEventListener('pointerleave', () => {
-      const g = sceneObj.group.children[0];
-      if (g) gsap.to(g.scale, { x: 1, y: 1, z: 1, duration: 0.4, ease: 'power2.out' });
-    });
-    // drag to rotate
-    let dragging = false, sx = 0, ry0 = 0;
-    canvas.addEventListener('pointerdown', (e) => {
-      dragging = true; sx = e.clientX;
-      const g = sceneObj.group.children[0];
-      ry0 = g ? g.rotation.y : 0;
-    });
-    canvas.addEventListener('pointermove', (e) => {
-      if (!dragging) return;
-      const g = sceneObj.group.children[0];
-      if (g) g.rotation.y = ry0 + (e.clientX - sx) * 0.01;
-    });
-    window.addEventListener('pointerup', () => { dragging = false; });
-  }
-  attachHover(document.getElementById('fruitCanvas'), fruitScene);
-  attachHover(document.getElementById('treatCanvas'), treatScene);
-
   // ========== FRUIT UI ==========
+  const fruitEmojiEl = document.getElementById('fruitEmoji');
+  const fruitTreatEmojiEl = document.getElementById('fruitTreatEmoji');
   const fruitWeekNum = document.getElementById('fruitWeekNum');
   const fruitHeadline = document.getElementById('fruitHeadline');
   const fruitSize = document.getElementById('fruitSize');
@@ -1570,11 +1305,17 @@
     fruitHeadline.textContent = w.name;
     fruitSize.textContent = '· ' + w.size;
     fruitTreat.textContent = w.treat;
-    // highlight selected chip
+    fruitEmojiEl.textContent = w.emoji;
+    fruitTreatEmojiEl.textContent = w.tEmoji;
+    // restart pop animation
+    fruitEmojiEl.style.animation = 'none';
+    fruitTreatEmojiEl.style.animation = 'none';
+    void fruitEmojiEl.offsetWidth;
+    fruitEmojiEl.style.animation = '';
+    fruitTreatEmojiEl.style.animation = '';
     [...fruitStripEl.children].forEach(c => {
       c.classList.toggle('selected', parseInt(c.dataset.week, 10) === n);
     });
-    loadWeekIntoScene(w);
   }
 
   function buildStrip() {
