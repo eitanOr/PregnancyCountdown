@@ -116,37 +116,15 @@
     margin: 0 auto;
   }
 
-  /* ---------- Header ---------- */
-  header {
+  /* ---------- Top bar ---------- */
+  .top-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 36px;
+    margin-bottom: 18px;
     opacity: 0;
     animation: fadeUp 0.8s 0.1s var(--ease) forwards;
   }
-
-  .brand {
-    font-family: 'Fraunces', serif;
-    font-style: italic;
-    font-weight: 300;
-    font-size: 15px;
-    color: var(--ink-soft);
-    letter-spacing: 0.02em;
-  }
-
-  .brand-dot {
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: var(--accent);
-    margin: 0 8px 2px;
-    vertical-align: middle;
-    box-shadow: 0 0 0 0 rgba(201,123,99,0.5);
-    animation: dotPulse 2.4s ease-in-out infinite;
-  }
-
   .date-stamp {
     font-size: 11px;
     letter-spacing: 0.16em;
@@ -154,58 +132,65 @@
     color: var(--ink-soft);
     font-weight: 500;
   }
+  .target-pill {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 6px 12px;
+    color: var(--accent);
+    transition: background var(--t-fast) var(--ease), transform var(--t-fast) var(--ease);
+  }
+  .target-pill:hover { background: #fff; transform: translateY(-1px); }
 
-  /* ---------- Hero ---------- */
-  .hero {
-    text-align: center;
-    padding: 8px 0 16px;
+  /* ---------- Mama art (interactive belly) ---------- */
+  .mama-art {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 4px 0 22px;
     opacity: 0;
     animation: fadeUp 0.9s 0.25s var(--ease) forwards;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
-
-  .eyebrow {
+  .mama-art svg {
+    overflow: visible;
+    filter: drop-shadow(0 14px 30px rgba(201,123,99,0.18));
+    transition: transform var(--t-med) var(--ease);
+  }
+  .mama-art:hover svg { transform: scale(1.03); }
+  .mama-art .belly {
+    transform-origin: 110px 110px;
+    animation: breathe 5.4s ease-in-out infinite;
+  }
+  .mama-art .halo {
+    transform-origin: 110px 110px;
+    animation: haloPulse 5.4s ease-in-out infinite;
+  }
+  .mama-art .heart-svg {
+    transform-origin: 110px 116px;
+    animation: heartbeat 1.4s ease-in-out infinite;
+  }
+  .mama-art .orbiter {
+    transform-origin: 110px 110px;
+    animation: orbit 16s linear infinite;
+  }
+  .mama-art.kicked .belly { animation: kick 0.9s var(--ease); }
+  .mama-art.kicked .heart-svg { animation: heartbeat 0.5s ease-in-out 3; }
+  .mama-tag {
+    margin-top: 10px;
     font-family: 'Fraunces', serif;
     font-style: italic;
     font-weight: 300;
-    font-size: 17px;
-    color: var(--accent);
-    letter-spacing: 0.01em;
-    margin-bottom: 6px;
-  }
-
-  h1 {
-    font-family: 'Fraunces', serif;
-    font-weight: 300;
-    font-size: clamp(34px, 7vw, 48px);
-    line-height: 1.05;
-    letter-spacing: -0.02em;
-    margin-bottom: 14px;
-  }
-
-  h1 em {
-    font-style: italic;
-    color: var(--accent);
-    font-weight: 300;
-    background: linear-gradient(90deg, var(--accent), var(--pink), var(--accent));
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
-    animation: shimmerText 6s ease-in-out infinite;
-  }
-
-  .target-line {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--ink-soft);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin-bottom: 36px;
+    letter-spacing: 0.02em;
+    opacity: 0.85;
+    transition: opacity var(--t-fast) var(--ease);
   }
-
-  .target-line strong {
-    color: var(--ink);
-    font-weight: 500;
-  }
+  .mama-art:hover .mama-tag { opacity: 1; color: var(--accent); }
 
   /* ---------- The main number ---------- */
   .main-card {
@@ -615,6 +600,49 @@
     100% { transform: translate3d(var(--drift, 40px), 110vh, 0) rotate(540deg); opacity: 0; }
   }
 
+  @keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.035); }
+  }
+  @keyframes haloPulse {
+    0%, 100% { opacity: 0.7; transform: scale(1); }
+    50%      { opacity: 1;   transform: scale(1.06); }
+  }
+  @keyframes heartbeat {
+    0%, 60%, 100% { transform: scale(1); }
+    15%           { transform: scale(1.18); }
+    30%           { transform: scale(0.96); }
+    45%           { transform: scale(1.10); }
+  }
+  @keyframes orbit {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes kick {
+    0%   { transform: scale(1) translate(0, 0); }
+    25%  { transform: scale(1.05) translate(4px, -2px); }
+    50%  { transform: scale(0.98) translate(-3px, 2px); }
+    75%  { transform: scale(1.04) translate(2px, -1px); }
+    100% { transform: scale(1) translate(0, 0); }
+  }
+
+  /* click ripple anywhere */
+  .ripple {
+    position: fixed;
+    pointer-events: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    transform: translate(-50%, -50%);
+    z-index: 6;
+    animation: ripple 700ms ease-out forwards;
+  }
+  @keyframes ripple {
+    0%   { width: 12px;  height: 12px;  opacity: 0.7; }
+    100% { width: 140px; height: 140px; opacity: 0; }
+  }
+
   @keyframes digitFlip {
     0%   { transform: translateY(0) scale(1); }
     40%  { transform: translateY(-8px) scale(1.15); }
@@ -658,19 +686,50 @@
 
 <div class="wrap" id="root">
 
-  <header>
-    <div class="brand">
-      For my love<span class="brand-dot"></span><em>almost there</em>
-    </div>
+  <header class="top-bar">
     <div class="date-stamp" id="todayStamp">—</div>
+    <div class="date-stamp target-pill" id="targetPill">→ <span id="targetDate">25 June 2026</span></div>
   </header>
 
-  <section class="hero">
-    <div class="eyebrow">a small countdown,</div>
-    <h1>until <em>maternity leave</em></h1>
-    <div class="target-line">
-      target · <strong id="targetDate">25 June 2026</strong>
-    </div>
+  <section class="mama-art" aria-hidden="true" id="mamaArt">
+    <svg viewBox="0 0 220 220" width="180" height="180">
+      <defs>
+        <radialGradient id="bellyGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#fdf8ef"/>
+          <stop offset="70%" stop-color="#f4d7cd"/>
+          <stop offset="100%" stop-color="#e9b8a7"/>
+        </radialGradient>
+        <radialGradient id="haloGrad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(212,175,55,0.45)"/>
+          <stop offset="100%" stop-color="rgba(212,175,55,0)"/>
+        </radialGradient>
+      </defs>
+      <!-- soft halo -->
+      <circle cx="110" cy="110" r="100" fill="url(#haloGrad)" class="halo"/>
+      <!-- belly silhouette -->
+      <path class="belly" d="M110 28
+               C 70 28, 44 60, 44 110
+               C 44 162, 70 198, 110 198
+               C 150 198, 176 162, 176 110
+               C 176 60, 150 28, 110 28 Z"
+            fill="url(#bellyGrad)" stroke="rgba(201,123,99,0.35)" stroke-width="1.2"/>
+      <!-- heart inside, beats -->
+      <path class="heart-svg" id="heartSvg"
+            d="M110 138
+               C 102 128, 86 122, 86 108
+               C 86 100, 92 94, 100 94
+               C 105 94, 109 97, 110 100
+               C 111 97, 115 94, 120 94
+               C 128 94, 134 100, 134 108
+               C 134 122, 118 128, 110 138 Z"
+            fill="#c97b63"/>
+      <!-- tiny orbiting star -->
+      <circle class="orbit" cx="110" cy="110" r="92" fill="none" stroke="rgba(42,37,32,0.06)" stroke-dasharray="2 5"/>
+      <g class="orbiter">
+        <circle cx="110" cy="18" r="3.5" fill="#d4af37"/>
+      </g>
+    </svg>
+    <div class="mama-tag">tap to feel a kick</div>
   </section>
 
   <section class="main-card" id="mainCard">
@@ -994,11 +1053,37 @@
     }, { passive: true });
   }
 
+  // ========== KICK + RIPPLE ==========
+  function kickBelly() {
+    const mama = document.getElementById('mamaArt');
+    mama.classList.remove('kicked');
+    void mama.offsetWidth;
+    mama.classList.add('kicked');
+    const r = mama.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2 + 20);
+    if (navigator.vibrate) navigator.vibrate(30);
+  }
+  function attachRipple() {
+    if (reduceMotion) return;
+    document.addEventListener('click', (e) => {
+      // ignore clicks on form controls — keep their feedback clean
+      if (e.target.closest('button')) return;
+      const r = document.createElement('span');
+      r.className = 'ripple';
+      r.style.left = e.clientX + 'px';
+      r.style.top = e.clientY + 'px';
+      document.body.appendChild(r);
+      setTimeout(() => r.remove(), 700);
+    }, { passive: true });
+  }
+
   // ========== INIT ==========
   spawnPetals();
   attachTilt(document.getElementById('mainCard'));
   attachParallax();
+  attachRipple();
   showDailyQuote();
+  document.getElementById('mamaArt').addEventListener('click', kickBelly);
   document.getElementById('newQuoteBtn').addEventListener('click', showRandomQuote);
   document.getElementById('heart').addEventListener('click', (e) => {
     const r = e.target.getBoundingClientRect();
