@@ -3,6 +3,7 @@
 // Designed to run from GitHub Actions on a daily schedule (10:00 Asia/Jerusalem).
 
 const nodemailer = require('nodemailer');
+const { quoteForDate } = require('./quotes');
 
 // ==================== CONFIG ====================
 const TARGET_DATE = new Date(Date.UTC(2026, 5, 25, 0, 0, 0)); // 25 June 2026 (month is 0-indexed)
@@ -72,6 +73,7 @@ const workDays = countWorkingDays(today, TARGET_DATE);
 const workHours = workDays * HOURS_PER_WORK_DAY;
 const calDays = calendarDaysBetween(today, TARGET_DATE);
 const arrived = today >= TARGET_DATE;
+const dailyQuote = quoteForDate(today);
 
 const targetStr = new Date(TARGET_DATE).toLocaleDateString('en-GB', {
   day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC'
@@ -146,6 +148,12 @@ function buildHtml() {
     </tr>
   </table>
 
+  <div style="background:linear-gradient(135deg,rgba(233,184,167,0.25),rgba(138,154,123,0.18));border:1px solid rgba(42,37,32,0.12);border-radius:18px;padding:22px 22px 20px;margin:6px 0 4px;position:relative;">
+    <div style="font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:#6b5d52;margin-bottom:8px;">For you, today</div>
+    <div style="font-family:Georgia,serif;font-style:italic;font-size:17px;line-height:1.5;color:#2a2520;">${dailyQuote}</div>
+    <div style="margin-top:10px;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:#c97b63;">— with love ❤</div>
+  </div>
+
   ${linkBlock}
 
   <p style="text-align:center;font-style:italic;color:#6b5d52;font-size:14px;line-height:1.6;margin-top:24px;">
@@ -168,6 +176,9 @@ function buildText() {
     `  ${workDays} working ${workDays === 1 ? 'day' : 'days'} remaining`,
     `  ${workHours.toLocaleString()} working hours`,
     `  ${calDays} calendar days`,
+    ``,
+    `For you, today:`,
+    `  "${dailyQuote}"`,
     ``,
     WEBSITE_URL ? `Open the countdown: ${WEBSITE_URL}` : '',
     ``,

@@ -286,6 +286,131 @@
     margin-top: 6px;
   }
 
+  /* ---------- Live D/H/M/S ticker ---------- */
+  .ticker {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 22px 0 4px;
+  }
+  .tick {
+    background: rgba(255,255,255,0.55);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 12px 6px 10px;
+    text-align: center;
+    backdrop-filter: blur(6px);
+    position: relative;
+    overflow: hidden;
+    transition: transform var(--t-fast) var(--ease);
+  }
+  .tick:hover { transform: translateY(-2px); }
+  .tick-val {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(22px, 6vw, 30px);
+    line-height: 1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    display: inline-block;
+    transition: transform 0.4s var(--ease);
+  }
+  .tick-val.flip { animation: digitFlip 0.5s var(--ease); }
+  .tick-lbl {
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 6px;
+  }
+  .tick.seconds .tick-val { color: var(--accent); }
+
+  /* ---------- Quote of the day ---------- */
+  .quote-card {
+    background: linear-gradient(135deg, rgba(233,184,167,0.22), rgba(138,154,123,0.18));
+    border: 1px solid var(--line);
+    border-radius: 22px;
+    padding: 26px 24px;
+    margin-bottom: 22px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp 1s 0.62s var(--ease) forwards;
+  }
+  .quote-card::before {
+    content: '"';
+    position: absolute;
+    top: -22px;
+    left: 14px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 120px;
+    color: var(--accent);
+    opacity: 0.18;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .quote-label {
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+    position: relative;
+  }
+  .quote-text {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: clamp(17px, 4.2vw, 21px);
+    line-height: 1.45;
+    color: var(--ink);
+    position: relative;
+    min-height: 60px;
+    transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  }
+  .quote-text.swap-out { opacity: 0; transform: translateY(6px); }
+  .quote-sig {
+    margin-top: 14px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    position: relative;
+  }
+  .new-quote-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,0.6);
+    color: var(--ink-soft);
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--t-fast) var(--ease), background var(--t-fast) var(--ease);
+  }
+  .new-quote-btn:hover { background: #fff; transform: rotate(180deg); }
+  .new-quote-btn:active { transform: rotate(360deg) scale(0.9); }
+
+  /* sparkles */
+  .sparkle {
+    position: fixed;
+    pointer-events: none;
+    width: 6px;
+    height: 6px;
+    z-index: 5;
+    background: radial-gradient(circle, var(--gold), transparent 60%);
+    border-radius: 50%;
+    animation: sparkleOut 900ms ease-out forwards;
+  }
+
   /* ---------- Secondary stats grid ---------- */
   .stats {
     display: grid;
@@ -490,6 +615,18 @@
     100% { transform: translate3d(var(--drift, 40px), 110vh, 0) rotate(540deg); opacity: 0; }
   }
 
+  @keyframes digitFlip {
+    0%   { transform: translateY(0) scale(1); }
+    40%  { transform: translateY(-8px) scale(1.15); }
+    100% { transform: translateY(0) scale(1); }
+  }
+
+  @keyframes sparkleOut {
+    0%   { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+    50%  { opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--sx, 0px)), calc(-50% + var(--sy, -30px))) scale(1.4); opacity: 0; }
+  }
+
   @keyframes burst {
     0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
     20%  { opacity: 1; }
@@ -540,6 +677,20 @@
     <div class="label">Working days remaining</div>
     <div class="big-number" id="bigNumber">—</div>
     <div class="unit" id="bigUnit">days of work left</div>
+
+    <div class="ticker" id="ticker" aria-label="Time remaining">
+      <div class="tick"><span class="tick-val" id="tDays">—</span><div class="tick-lbl">days</div></div>
+      <div class="tick"><span class="tick-val" id="tHours">—</span><div class="tick-lbl">hours</div></div>
+      <div class="tick"><span class="tick-val" id="tMins">—</span><div class="tick-lbl">minutes</div></div>
+      <div class="tick seconds"><span class="tick-val" id="tSecs">—</span><div class="tick-lbl">seconds</div></div>
+    </div>
+  </section>
+
+  <section class="quote-card" aria-label="Today's empowering note">
+    <button class="new-quote-btn" id="newQuoteBtn" title="Another one" aria-label="Show another quote">↻</button>
+    <div class="quote-label">For you, today</div>
+    <div class="quote-text" id="quoteText">—</div>
+    <div class="quote-sig">— with love ❤</div>
   </section>
 
   <section class="stats">
@@ -570,6 +721,7 @@
 
 </div>
 
+<script src="quotes.js"></script>
 <script>
   // ========== CONFIG ==========
   const TARGET_DATE = new Date(2026, 5, 25, 0, 0, 0);
@@ -751,16 +903,124 @@
     }, initial ? 700 : 0);
   }
 
+  // ========== LIVE TICKER (D/H/M/S to target) ==========
+  // Days shown = full calendar days remaining; H/M/S are the remainder.
+  const tickEls = {
+    d: document.getElementById('tDays'),
+    h: document.getElementById('tHours'),
+    m: document.getElementById('tMins'),
+    s: document.getElementById('tSecs'),
+  };
+  const lastTick = { d: null, h: null, m: null, s: null };
+
+  function pad2(n) { return String(n).padStart(2, '0'); }
+
+  function updateTicker() {
+    const now = new Date();
+    let ms = TARGET_DATE - now;
+    if (ms < 0) ms = 0;
+    const totalSec = Math.floor(ms / 1000);
+    const d = Math.floor(totalSec / 86400);
+    const h = Math.floor((totalSec % 86400) / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    const next = { d, h: pad2(h), m: pad2(m), s: pad2(s) };
+    for (const k of ['d', 'h', 'm', 's']) {
+      if (lastTick[k] !== next[k]) {
+        tickEls[k].textContent = next[k];
+        if (lastTick[k] !== null && !reduceMotion) {
+          tickEls[k].classList.remove('flip');
+          void tickEls[k].offsetWidth;
+          tickEls[k].classList.add('flip');
+          if (k === 's') sparkleAt(tickEls.s);
+        }
+        lastTick[k] = next[k];
+      }
+    }
+  }
+
+  // ========== SPARKLES ==========
+  function sparkleAt(el) {
+    if (reduceMotion) return;
+    const r = el.getBoundingClientRect();
+    const cx = r.left + r.width / 2;
+    const cy = r.top + r.height / 2;
+    for (let i = 0; i < 3; i++) {
+      const s = document.createElement('span');
+      s.className = 'sparkle';
+      s.style.left = cx + 'px';
+      s.style.top = cy + 'px';
+      const a = Math.random() * Math.PI * 2;
+      const rad = 20 + Math.random() * 18;
+      s.style.setProperty('--sx', (Math.cos(a) * rad).toFixed(0) + 'px');
+      s.style.setProperty('--sy', (Math.sin(a) * rad - 10).toFixed(0) + 'px');
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 900);
+    }
+  }
+
+  // ========== QUOTES ==========
+  let quoteShuffleIndex = null;
+  function setQuote(text) {
+    const el = document.getElementById('quoteText');
+    if (reduceMotion) { el.textContent = text; return; }
+    el.classList.add('swap-out');
+    setTimeout(() => {
+      el.textContent = text;
+      el.classList.remove('swap-out');
+    }, 280);
+  }
+  function showDailyQuote() {
+    setQuote(window.PregnancyQuotes.quoteForDate(new Date()));
+  }
+  function showRandomQuote() {
+    const list = window.PregnancyQuotes.QUOTES;
+    let idx;
+    do { idx = Math.floor(Math.random() * list.length); }
+    while (list.length > 1 && idx === quoteShuffleIndex);
+    quoteShuffleIndex = idx;
+    setQuote(list[idx]);
+  }
+
+  // ========== MOUSE PARALLAX ==========
+  function attachParallax() {
+    if (reduceMotion) return;
+    const aurora = document.body; // body::after is the aurora; we shift via CSS var
+    document.addEventListener('mousemove', (e) => {
+      const x = (e.clientX / window.innerWidth - 0.5);
+      const y = (e.clientY / window.innerHeight - 0.5);
+      document.documentElement.style.setProperty('--px', (x * 12).toFixed(1) + 'px');
+      document.documentElement.style.setProperty('--py', (y * 12).toFixed(1) + 'px');
+    }, { passive: true });
+  }
+
   // ========== INIT ==========
   spawnPetals();
   attachTilt(document.getElementById('mainCard'));
+  attachParallax();
+  showDailyQuote();
+  document.getElementById('newQuoteBtn').addEventListener('click', showRandomQuote);
   document.getElementById('heart').addEventListener('click', (e) => {
     const r = e.target.getBoundingClientRect();
     burst(r.left + r.width / 2, r.top + r.height / 2);
   });
+  // tap the big number for a little burst of joy
+  document.getElementById('mainCard').addEventListener('click', (e) => {
+    if (e.target.closest('.ticker')) return;
+    sparkleAt(document.getElementById('bigNumber'));
+  });
 
   render(true);
+  updateTicker();
+  setInterval(updateTicker, 1000);
   setInterval(() => render(false), 60 * 1000);
+  // refresh quote at local midnight
+  setInterval(() => {
+    const n = new Date();
+    if (n.getHours() === 0 && n.getMinutes() === 0 && n.getSeconds() < 5) {
+      showDailyQuote();
+    }
+  }, 4000);
 </script>
 </body>
 </html>
