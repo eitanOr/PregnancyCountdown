@@ -11,22 +11,27 @@
 <style>
   /* ============================================
      COUNTDOWN TO MATERNITY LEAVE
+     Design: Soft UI Evolution (wellness palette)
      Target: 25 June 2026
-     Excludes: Fridays, Saturdays, and the holidays
-     listed in the HOLIDAYS array below.
      ============================================ */
 
   :root {
-    --bg:        #f5ecdf;     /* warm cream */
+    --bg:        #f5ecdf;
     --bg-soft:   #ede0cc;
-    --ink:       #2a2520;     /* deep cocoa */
+    --ink:       #2a2520;
     --ink-soft:  #6b5d52;
-    --accent:    #c97b63;     /* dusty terracotta */
-    --accent-2:  #8a9a7b;     /* sage */
-    --pink:      #e9b8a7;     /* dusty rose */
+    --accent:    #c97b63;
+    --accent-2:  #8a9a7b;
+    --pink:      #e9b8a7;
+    --gold:      #d4af37;
     --line:      rgba(42,37,32,0.12);
     --shadow:    0 1px 2px rgba(42,37,32,0.04),
                  0 12px 40px -12px rgba(42,37,32,0.18);
+    --shadow-lift: 0 2px 4px rgba(42,37,32,0.06),
+                   0 24px 60px -16px rgba(42,37,32,0.28);
+    --t-fast: 180ms;
+    --t-med:  280ms;
+    --ease:   cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,13 +45,28 @@
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     line-height: 1.5;
-    /* subtle grain */
     background-image:
-      radial-gradient(circle at 20% 10%, rgba(233,184,167,0.25) 0%, transparent 45%),
-      radial-gradient(circle at 80% 90%, rgba(138,154,123,0.18) 0%, transparent 50%);
+      radial-gradient(circle at 20% 10%, rgba(233,184,167,0.35) 0%, transparent 45%),
+      radial-gradient(circle at 80% 90%, rgba(138,154,123,0.22) 0%, transparent 50%);
+    background-attachment: fixed;
   }
 
-  /* Subtle paper grain via SVG noise */
+  /* Slowly drifting aurora behind everything */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: -20%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(ellipse 40% 30% at 30% 30%, rgba(233,184,167,0.28), transparent 60%),
+      radial-gradient(ellipse 35% 25% at 70% 70%, rgba(138,154,123,0.22), transparent 60%),
+      radial-gradient(ellipse 30% 25% at 50% 50%, rgba(212,175,55,0.10), transparent 60%);
+    filter: blur(20px);
+    animation: drift 22s ease-in-out infinite alternate;
+  }
+
+  /* SVG noise grain */
   body::before {
     content: '';
     position: fixed;
@@ -57,9 +77,36 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.14  0 0 0 0 0.12  0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
 
+  /* Floating petals canvas */
+  .petals {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    overflow: hidden;
+  }
+  .petal {
+    position: absolute;
+    top: -40px;
+    width: 14px;
+    height: 14px;
+    border-radius: 60% 0 60% 0;
+    background: linear-gradient(135deg, var(--pink), var(--accent));
+    opacity: 0;
+    animation: fall linear infinite;
+    will-change: transform, opacity;
+  }
+  .petal:nth-child(odd) {
+    background: linear-gradient(135deg, #f4d7cd, var(--pink));
+    width: 10px; height: 10px;
+  }
+  .petal:nth-child(3n) {
+    background: linear-gradient(135deg, #d8e0c7, var(--accent-2));
+  }
+
   .wrap {
     position: relative;
-    z-index: 1;
+    z-index: 2;
     min-height: 100vh;
     min-height: 100dvh;
     display: flex;
@@ -76,7 +123,7 @@
     justify-content: space-between;
     margin-bottom: 36px;
     opacity: 0;
-    animation: fadeUp 0.8s 0.1s forwards;
+    animation: fadeUp 0.8s 0.1s var(--ease) forwards;
   }
 
   .brand {
@@ -96,6 +143,8 @@
     background: var(--accent);
     margin: 0 8px 2px;
     vertical-align: middle;
+    box-shadow: 0 0 0 0 rgba(201,123,99,0.5);
+    animation: dotPulse 2.4s ease-in-out infinite;
   }
 
   .date-stamp {
@@ -111,7 +160,7 @@
     text-align: center;
     padding: 8px 0 16px;
     opacity: 0;
-    animation: fadeUp 0.9s 0.25s forwards;
+    animation: fadeUp 0.9s 0.25s var(--ease) forwards;
   }
 
   .eyebrow {
@@ -137,6 +186,12 @@
     font-style: italic;
     color: var(--accent);
     font-weight: 300;
+    background: linear-gradient(90deg, var(--accent), var(--pink), var(--accent));
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmerText 6s ease-in-out infinite;
   }
 
   .target-line {
@@ -162,9 +217,16 @@
     box-shadow: var(--shadow);
     margin-bottom: 18px;
     opacity: 0;
-    animation: fadeUp 1s 0.4s forwards;
+    animation: fadeUp 1s 0.4s var(--ease) forwards;
     position: relative;
     overflow: hidden;
+    transition: transform var(--t-med) var(--ease),
+                box-shadow var(--t-med) var(--ease);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+  .main-card:hover {
+    box-shadow: var(--shadow-lift);
   }
 
   /* decorative arch */
@@ -176,8 +238,20 @@
     transform: translateX(-50%);
     width: 120%;
     height: 120px;
-    background: radial-gradient(ellipse at center top, rgba(233,184,167,0.4) 0%, transparent 70%);
+    background: radial-gradient(ellipse at center top, rgba(233,184,167,0.45) 0%, transparent 70%);
     pointer-events: none;
+    animation: glow 5s ease-in-out infinite alternate;
+  }
+
+  /* gentle inner highlight */
+  .main-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), transparent 30%);
+    mix-blend-mode: overlay;
   }
 
   .label {
@@ -198,12 +272,10 @@
     letter-spacing: -0.04em;
     position: relative;
     font-variant-numeric: tabular-nums;
+    transition: transform var(--t-med) var(--ease);
   }
 
-  .big-number .digit {
-    display: inline-block;
-    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
+  .big-number.bump { animation: bump 600ms var(--ease); }
 
   .unit {
     font-family: 'Fraunces', serif;
@@ -221,7 +293,7 @@
     gap: 12px;
     margin-bottom: 28px;
     opacity: 0;
-    animation: fadeUp 1s 0.55s forwards;
+    animation: fadeUp 1s 0.55s var(--ease) forwards;
   }
 
   .stat {
@@ -231,6 +303,15 @@
     padding: 22px 18px;
     text-align: center;
     backdrop-filter: blur(8px);
+    transition: transform var(--t-fast) var(--ease),
+                box-shadow var(--t-fast) var(--ease),
+                background var(--t-fast) var(--ease);
+    cursor: default;
+  }
+  .stat:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+    background: rgba(253, 248, 239, 0.95);
   }
 
   .stat-num {
@@ -254,7 +335,7 @@
   .progress-wrap {
     margin-bottom: 32px;
     opacity: 0;
-    animation: fadeUp 1s 0.7s forwards;
+    animation: fadeUp 1s 0.7s var(--ease) forwards;
   }
 
   .progress-header {
@@ -279,19 +360,33 @@
   }
 
   .progress-track {
-    height: 8px;
+    height: 10px;
     background: rgba(42,37,32,0.08);
     border-radius: 100px;
     overflow: hidden;
     position: relative;
+    box-shadow: inset 0 1px 2px rgba(42,37,32,0.08);
   }
 
   .progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, var(--pink), var(--accent));
+    background: linear-gradient(90deg, var(--pink), var(--accent), var(--gold), var(--accent), var(--pink));
+    background-size: 300% 100%;
     border-radius: 100px;
     width: 0%;
-    transition: width 1.4s cubic-bezier(0.65, 0, 0.35, 1);
+    transition: width 1.6s cubic-bezier(0.65, 0, 0.35, 1);
+    position: relative;
+    animation: flowBg 8s linear infinite;
+  }
+
+  /* shimmer sweep on progress */
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent);
+    transform: translateX(-100%);
+    animation: shimmer 2.6s ease-in-out infinite;
   }
 
   /* ---------- Footer note ---------- */
@@ -306,13 +401,28 @@
     padding: 18px 12px;
     margin-top: auto;
     opacity: 0;
-    animation: fadeUp 1s 0.85s forwards;
+    animation: fadeUp 1s 0.85s var(--ease) forwards;
   }
 
   .note .heart {
     color: var(--accent);
     display: inline-block;
     animation: pulse 2.4s ease-in-out infinite;
+    cursor: pointer;
+    transition: transform var(--t-fast) var(--ease);
+  }
+  .note .heart:hover {
+    transform: scale(1.4);
+  }
+
+  /* burst hearts on click */
+  .burst-heart {
+    position: fixed;
+    pointer-events: none;
+    color: var(--accent);
+    font-size: 18px;
+    z-index: 10;
+    animation: burst 1.2s ease-out forwards;
   }
 
   /* ---------- Done state ---------- */
@@ -336,6 +446,56 @@
     50%      { transform: scale(1.18); }
   }
 
+  @keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201,123,99,0.5); }
+    50%      { box-shadow: 0 0 0 6px rgba(201,123,99,0); }
+  }
+
+  @keyframes drift {
+    0%   { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-4%, 3%) rotate(2deg); }
+  }
+
+  @keyframes glow {
+    0%   { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes shimmer {
+    0%   { transform: translateX(-100%); }
+    60%  { transform: translateX(100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  @keyframes flowBg {
+    0%   { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+  }
+
+  @keyframes shimmerText {
+    0%, 100% { background-position: 0% center; }
+    50%      { background-position: 100% center; }
+  }
+
+  @keyframes bump {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes fall {
+    0%   { transform: translate3d(0, -10vh, 0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.9; }
+    90%  { opacity: 0.9; }
+    100% { transform: translate3d(var(--drift, 40px), 110vh, 0) rotate(540deg); opacity: 0; }
+  }
+
+  @keyframes burst {
+    0%   { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+    20%  { opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--bx, 0px)), calc(-50% + var(--by, -80px))) scale(1.4); opacity: 0; }
+  }
+
   /* tighter on small screens */
   @media (max-width: 380px) {
     .wrap { padding: 22px 16px 32px; }
@@ -343,9 +503,22 @@
     .stat { padding: 18px 12px; }
     .stat-num { font-size: 32px; }
   }
+
+  /* Accessibility — respect reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+    .petals { display: none; }
+  }
 </style>
 </head>
 <body>
+
+<div class="petals" aria-hidden="true" id="petals"></div>
+
 <div class="wrap" id="root">
 
   <header>
@@ -391,7 +564,7 @@
   </section>
 
   <div class="note">
-    Every day closer is a day softer. <span class="heart">❤</span><br>
+    Every day closer is a day softer. <span class="heart" id="heart">❤</span><br>
     You've got this, mama-to-be.
   </div>
 
@@ -399,28 +572,13 @@
 
 <script>
   // ========== CONFIG ==========
-  // Maternity leave start date (the goal): June 25, 2026
-  const TARGET_DATE = new Date(2026, 5, 25, 0, 0, 0); // Note: month is 0-indexed (5 = June)
-
-  // Start date used to compute progress percentage.
-  // Defaults to "today this site was first generated" — change if you want
-  // progress measured from an earlier date (e.g., the day you found out).
-  const START_DATE = new Date(2026, 4, 25, 0, 0, 0); // 25 May 2026
-
-  // Israeli public holidays between now and TARGET_DATE.
-  // Add any custom vacation/personal days here as 'YYYY-MM-DD' strings.
-  // (Verified: no Israeli national holidays fall between 25 May - 25 June 2026.
-  //  Shavuot 2026 was 22 May, before the window.)
-  const HOLIDAYS = [
-    // 'YYYY-MM-DD' — add more here if needed
-    // e.g. '2026-06-10', // personal vacation day
-  ];
-
-  // Non-working weekdays in Israel: Friday (5), Saturday (6)
+  const TARGET_DATE = new Date(2026, 5, 25, 0, 0, 0);
+  const START_DATE  = new Date(2026, 4, 25, 0, 0, 0);
+  const HOLIDAYS = [];
   const NON_WORK_DAYS = [5, 6];
-
-  // Hours per working day (you chose "total hours of working days")
   const HOURS_PER_WORK_DAY = 24;
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   // ========== HELPERS ==========
   function ymd(d) {
@@ -429,21 +587,16 @@
     const day = String(d.getDate()).padStart(2, '0');
     return `${y}-${m}-${day}`;
   }
-
   function isWorkingDay(d) {
     if (NON_WORK_DAYS.includes(d.getDay())) return false;
     if (HOLIDAYS.includes(ymd(d))) return false;
     return true;
   }
-
-  // Count working days strictly BETWEEN today (exclusive) and TARGET_DATE (exclusive).
-  // I.e. days she still has to work — not counting today (already partly gone)
-  // and not counting the target day itself (that's the leave day).
   function countWorkingDays(from, to) {
     let count = 0;
     const cur = new Date(from);
     cur.setHours(0, 0, 0, 0);
-    cur.setDate(cur.getDate() + 1); // start from tomorrow
+    cur.setDate(cur.getDate() + 1);
     const end = new Date(to);
     end.setHours(0, 0, 0, 0);
     while (cur < end) {
@@ -452,30 +605,101 @@
     }
     return count;
   }
-
   function calendarDaysBetween(from, to) {
     const ms = to.getTime() - from.getTime();
     return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
   }
 
+  // ========== COUNT-UP ANIMATION ==========
+  function animateNumber(el, target, duration = 1200, formatter = (n) => n) {
+    if (reduceMotion) { el.textContent = formatter(target); return; }
+    const start = 0;
+    const startTime = performance.now();
+    function frame(now) {
+      const t = Math.min(1, (now - startTime) / duration);
+      // ease-out-cubic
+      const eased = 1 - Math.pow(1 - t, 3);
+      const val = Math.round(start + (target - start) * eased);
+      el.textContent = formatter(val);
+      if (t < 1) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ========== PETALS ==========
+  function spawnPetals() {
+    if (reduceMotion) return;
+    const container = document.getElementById('petals');
+    const COUNT = 14;
+    for (let i = 0; i < COUNT; i++) {
+      const p = document.createElement('span');
+      p.className = 'petal';
+      const left = Math.random() * 100;
+      const dur = 14 + Math.random() * 18;
+      const delay = -Math.random() * dur;
+      const drift = (Math.random() * 160 - 80) + 'px';
+      p.style.left = left + 'vw';
+      p.style.animationDuration = dur + 's';
+      p.style.animationDelay = delay + 's';
+      p.style.setProperty('--drift', drift);
+      container.appendChild(p);
+    }
+  }
+
+  // ========== CARD TILT ==========
+  function attachTilt(card) {
+    if (reduceMotion) return;
+    let raf = null;
+    card.addEventListener('mousemove', (e) => {
+      const r = card.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width - 0.5;
+      const y = (e.clientY - r.top) / r.height - 0.5;
+      if (raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        card.style.transform = `perspective(900px) rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 6).toFixed(2)}deg) translateZ(0)`;
+      });
+    });
+    card.addEventListener('mouseleave', () => {
+      card.style.transform = '';
+    });
+  }
+
+  // ========== HEART BURST ==========
+  function burst(x, y) {
+    if (reduceMotion) return;
+    const glyphs = ['❤', '✿', '❀', '❤'];
+    for (let i = 0; i < 10; i++) {
+      const h = document.createElement('span');
+      h.className = 'burst-heart';
+      h.textContent = glyphs[i % glyphs.length];
+      h.style.left = x + 'px';
+      h.style.top = y + 'px';
+      const angle = (Math.PI * 2 * i) / 10;
+      const radius = 60 + Math.random() * 40;
+      h.style.setProperty('--bx', (Math.cos(angle) * radius).toFixed(0) + 'px');
+      h.style.setProperty('--by', (Math.sin(angle) * radius - 30).toFixed(0) + 'px');
+      h.style.fontSize = (14 + Math.random() * 10) + 'px';
+      document.body.appendChild(h);
+      setTimeout(() => h.remove(), 1200);
+    }
+  }
+
   // ========== RENDER ==========
-  function render() {
+  let lastWorkDays = null;
+  function render(initial = false) {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // Today stamp
     const todayStr = now.toLocaleDateString('en-GB', {
       day: '2-digit', month: 'short', year: 'numeric'
     });
     document.getElementById('todayStamp').textContent = todayStr;
 
-    // Target stamp
     document.getElementById('targetDate').textContent =
       TARGET_DATE.toLocaleDateString('en-GB', {
         day: 'numeric', month: 'long', year: 'numeric'
       });
 
-    // Has the day arrived?
     if (today >= TARGET_DATE) {
       document.getElementById('root').classList.add('done');
       document.getElementById('bigNumber').textContent = "You made it";
@@ -487,35 +711,56 @@
       return;
     }
 
-    // Working days remaining (not counting today)
     const workDays = countWorkingDays(today, TARGET_DATE);
     const workHours = workDays * HOURS_PER_WORK_DAY;
     const calDays = calendarDaysBetween(today, TARGET_DATE);
 
-    // Animated number
     const bn = document.getElementById('bigNumber');
-    bn.textContent = workDays;
+    if (initial) {
+      animateNumber(bn, workDays, 1400);
+      animateNumber(document.getElementById('hoursLeft'), workHours, 1600, (n) => n.toLocaleString());
+      animateNumber(document.getElementById('calDays'), calDays, 1400);
+    } else {
+      if (lastWorkDays !== null && lastWorkDays !== workDays) {
+        bn.classList.remove('bump');
+        void bn.offsetWidth;
+        bn.classList.add('bump');
+      }
+      bn.textContent = workDays;
+      document.getElementById('hoursLeft').textContent = workHours.toLocaleString();
+      document.getElementById('calDays').textContent = calDays;
+    }
+    lastWorkDays = workDays;
 
-    // Pluralize
     document.getElementById('bigUnit').textContent =
       workDays === 1 ? 'day of work left' : 'days of work left';
 
-    document.getElementById('hoursLeft').textContent = workHours.toLocaleString();
-    document.getElementById('calDays').textContent = calDays;
-
-    // Progress
     const totalSpanMs = TARGET_DATE - START_DATE;
     const elapsedMs = now - START_DATE;
     const pct = Math.max(0, Math.min(100, (elapsedMs / totalSpanMs) * 100));
-    document.getElementById('progressPct').textContent = pct.toFixed(0) + '%';
+
+    const pctEl = document.getElementById('progressPct');
+    if (initial) {
+      animateNumber(pctEl, Math.round(pct), 1600, (n) => n + '%');
+    } else {
+      pctEl.textContent = pct.toFixed(0) + '%';
+    }
+
     setTimeout(() => {
       document.getElementById('progressFill').style.width = pct + '%';
-    }, 600);
+    }, initial ? 700 : 0);
   }
 
-  render();
-  // Re-render every minute so the page stays fresh if left open
-  setInterval(render, 60 * 1000);
+  // ========== INIT ==========
+  spawnPetals();
+  attachTilt(document.getElementById('mainCard'));
+  document.getElementById('heart').addEventListener('click', (e) => {
+    const r = e.target.getBoundingClientRect();
+    burst(r.left + r.width / 2, r.top + r.height / 2);
+  });
+
+  render(true);
+  setInterval(() => render(false), 60 * 1000);
 </script>
 </body>
 </html>
