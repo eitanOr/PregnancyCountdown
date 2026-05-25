@@ -235,6 +235,12 @@
     margin-bottom: 18px;
     position: relative;
   }
+  .label-bold {
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 13px;
+    letter-spacing: 0.22em;
+  }
 
   .big-number {
     font-family: 'Fraunces', serif;
@@ -409,15 +415,6 @@
     background: linear-gradient(135deg, rgba(255,255,255,0.5), transparent 40%);
     pointer-events: none;
     mix-blend-mode: overlay;
-  }
-  .vlada-card::after {
-    content: '✿';
-    position: absolute;
-    top: 14px;
-    right: 18px;
-    font-size: 22px;
-    color: rgba(201,123,99,0.45);
-    animation: pulse 3.4s ease-in-out infinite;
   }
   .vlada-eyebrow {
     font-family: 'Fraunces', serif;
@@ -925,7 +922,7 @@
   </section>
 
   <section class="main-card" id="mainCard">
-    <div class="label">Working days remaining</div>
+    <div class="label label-bold">Working days remaining</div>
     <div class="big-number" id="bigNumber">—</div>
     <div class="unit" id="bigUnit">days of work left</div>
 
