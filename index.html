@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#f5ecdf" />
+<title>Countdown to Maternity Leave</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;1,9..144,300&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* ============================================
+     COUNTDOWN TO MATERNITY LEAVE
+     Target: 25 June 2026
+     Excludes: Fridays, Saturdays, and the holidays
+     listed in the HOLIDAYS array below.
+     ============================================ */
+
+  :root {
+    --bg:        #f5ecdf;     /* warm cream */
+    --bg-soft:   #ede0cc;
+    --ink:       #2a2520;     /* deep cocoa */
+    --ink-soft:  #6b5d52;
+    --accent:    #c97b63;     /* dusty terracotta */
+    --accent-2:  #8a9a7b;     /* sage */
+    --pink:      #e9b8a7;     /* dusty rose */
+    --line:      rgba(42,37,32,0.12);
+    --shadow:    0 1px 2px rgba(42,37,32,0.04),
+                 0 12px 40px -12px rgba(42,37,32,0.18);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body { min-height: 100%; }
+
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    /* subtle grain */
+    background-image:
+      radial-gradient(circle at 20% 10%, rgba(233,184,167,0.25) 0%, transparent 45%),
+      radial-gradient(circle at 80% 90%, rgba(138,154,123,0.18) 0%, transparent 50%);
+  }
+
+  /* Subtle paper grain via SVG noise */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    z-index: 0;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.16  0 0 0 0 0.14  0 0 0 0 0.12  0 0 0 0.08 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  }
+
+  .wrap {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    padding: 28px 22px 40px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s forwards;
+  }
+
+  .brand {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 15px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+  }
+
+  .brand-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    margin: 0 8px 2px;
+    vertical-align: middle;
+  }
+
+  .date-stamp {
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    font-weight: 500;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    text-align: center;
+    padding: 8px 0 16px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.25s forwards;
+  }
+
+  .eyebrow {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 17px;
+    color: var(--accent);
+    letter-spacing: 0.01em;
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(34px, 7vw, 48px);
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    margin-bottom: 14px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 300;
+  }
+
+  .target-line {
+    font-size: 13px;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 36px;
+  }
+
+  .target-line strong {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ---------- The main number ---------- */
+  .main-card {
+    background: linear-gradient(180deg, #fdf8ef 0%, #f8eedd 100%);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    padding: 40px 28px 36px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    margin-bottom: 18px;
+    opacity: 0;
+    animation: fadeUp 1s 0.4s forwards;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* decorative arch */
+  .main-card::before {
+    content: '';
+    position: absolute;
+    top: -60px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120%;
+    height: 120px;
+    background: radial-gradient(ellipse at center top, rgba(233,184,167,0.4) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .label {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 18px;
+    position: relative;
+  }
+
+  .big-number {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(96px, 28vw, 168px);
+    line-height: 0.9;
+    color: var(--ink);
+    letter-spacing: -0.04em;
+    position: relative;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .big-number .digit {
+    display: inline-block;
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .unit {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 22px;
+    color: var(--accent);
+    margin-top: 6px;
+  }
+
+  /* ---------- Secondary stats grid ---------- */
+  .stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+    opacity: 0;
+    animation: fadeUp 1s 0.55s forwards;
+  }
+
+  .stat {
+    background: rgba(253, 248, 239, 0.7);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 18px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+  }
+
+  .stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 8px;
+  }
+
+  /* ---------- Progress bar ---------- */
+  .progress-wrap {
+    margin-bottom: 32px;
+    opacity: 0;
+    animation: fadeUp 1s 0.7s forwards;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 10px;
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  .progress-header strong {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--accent);
+    text-transform: none;
+    letter-spacing: 0;
+  }
+
+  .progress-track {
+    height: 8px;
+    background: rgba(42,37,32,0.08);
+    border-radius: 100px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--pink), var(--accent));
+    border-radius: 100px;
+    width: 0%;
+    transition: width 1.4s cubic-bezier(0.65, 0, 0.35, 1);
+  }
+
+  /* ---------- Footer note ---------- */
+  .note {
+    text-align: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 300;
+    font-size: 15px;
+    color: var(--ink-soft);
+    line-height: 1.55;
+    padding: 18px 12px;
+    margin-top: auto;
+    opacity: 0;
+    animation: fadeUp 1s 0.85s forwards;
+  }
+
+  .note .heart {
+    color: var(--accent);
+    display: inline-block;
+    animation: pulse 2.4s ease-in-out infinite;
+  }
+
+  /* ---------- Done state ---------- */
+  .done .main-card {
+    background: linear-gradient(180deg, #f4eadc 0%, #e9b8a7 100%);
+  }
+
+  .done .big-number {
+    font-size: clamp(48px, 12vw, 80px);
+    font-style: italic;
+  }
+
+  /* ---------- Animations ---------- */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.18); }
+  }
+
+  /* tighter on small screens */
+  @media (max-width: 380px) {
+    .wrap { padding: 22px 16px 32px; }
+    .main-card { padding: 32px 18px 28px; }
+    .stat { padding: 18px 12px; }
+    .stat-num { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap" id="root">
+
+  <header>
+    <div class="brand">
+      For my love<span class="brand-dot"></span><em>almost there</em>
+    </div>
+    <div class="date-stamp" id="todayStamp">—</div>
+  </header>
+
+  <section class="hero">
+    <div class="eyebrow">a small countdown,</div>
+    <h1>until <em>maternity leave</em></h1>
+    <div class="target-line">
+      target · <strong id="targetDate">25 June 2026</strong>
+    </div>
+  </section>
+
+  <section class="main-card" id="mainCard">
+    <div class="label">Working days remaining</div>
+    <div class="big-number" id="bigNumber">—</div>
+    <div class="unit" id="bigUnit">days of work left</div>
+  </section>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-num" id="hoursLeft">—</div>
+      <div class="stat-label">Working hours</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="calDays">—</div>
+      <div class="stat-label">Calendar days</div>
+    </div>
+  </section>
+
+  <section class="progress-wrap">
+    <div class="progress-header">
+      <span>Journey progress</span>
+      <strong id="progressPct">0%</strong>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </section>
+
+  <div class="note">
+    Every day closer is a day softer. <span class="heart">❤</span><br>
+    You've got this, mama-to-be.
+  </div>
+
+</div>
+
+<script>
+  // ========== CONFIG ==========
+  // Maternity leave start date (the goal): June 25, 2026
+  const TARGET_DATE = new Date(2026, 5, 25, 0, 0, 0); // Note: month is 0-indexed (5 = June)
+
+  // Start date used to compute progress percentage.
+  // Defaults to "today this site was first generated" — change if you want
+  // progress measured from an earlier date (e.g., the day you found out).
+  const START_DATE = new Date(2026, 4, 25, 0, 0, 0); // 25 May 2026
+
+  // Israeli public holidays between now and TARGET_DATE.
+  // Add any custom vacation/personal days here as 'YYYY-MM-DD' strings.
+  // (Verified: no Israeli national holidays fall between 25 May - 25 June 2026.
+  //  Shavuot 2026 was 22 May, before the window.)
+  const HOLIDAYS = [
+    // 'YYYY-MM-DD' — add more here if needed
+    // e.g. '2026-06-10', // personal vacation day
+  ];
+
+  // Non-working weekdays in Israel: Friday (5), Saturday (6)
+  const NON_WORK_DAYS = [5, 6];
+
+  // Hours per working day (you chose "total hours of working days")
+  const HOURS_PER_WORK_DAY = 24;
+
+  // ========== HELPERS ==========
+  function ymd(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
+
+  function isWorkingDay(d) {
+    if (NON_WORK_DAYS.includes(d.getDay())) return false;
+    if (HOLIDAYS.includes(ymd(d))) return false;
+    return true;
+  }
+
+  // Count working days strictly BETWEEN today (exclusive) and TARGET_DATE (exclusive).
+  // I.e. days she still has to work — not counting today (already partly gone)
+  // and not counting the target day itself (that's the leave day).
+  function countWorkingDays(from, to) {
+    let count = 0;
+    const cur = new Date(from);
+    cur.setHours(0, 0, 0, 0);
+    cur.setDate(cur.getDate() + 1); // start from tomorrow
+    const end = new Date(to);
+    end.setHours(0, 0, 0, 0);
+    while (cur < end) {
+      if (isWorkingDay(cur)) count++;
+      cur.setDate(cur.getDate() + 1);
+    }
+    return count;
+  }
+
+  function calendarDaysBetween(from, to) {
+    const ms = to.getTime() - from.getTime();
+    return Math.max(0, Math.ceil(ms / (1000 * 60 * 60 * 24)));
+  }
+
+  // ========== RENDER ==========
+  function render() {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    // Today stamp
+    const todayStr = now.toLocaleDateString('en-GB', {
+      day: '2-digit', month: 'short', year: 'numeric'
+    });
+    document.getElementById('todayStamp').textContent = todayStr;
+
+    // Target stamp
+    document.getElementById('targetDate').textContent =
+      TARGET_DATE.toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+
+    // Has the day arrived?
+    if (today >= TARGET_DATE) {
+      document.getElementById('root').classList.add('done');
+      document.getElementById('bigNumber').textContent = "You made it";
+      document.getElementById('bigUnit').textContent = "maternity leave is here ✿";
+      document.getElementById('hoursLeft').textContent = '0';
+      document.getElementById('calDays').textContent = '0';
+      document.getElementById('progressPct').textContent = '100%';
+      document.getElementById('progressFill').style.width = '100%';
+      return;
+    }
+
+    // Working days remaining (not counting today)
+    const workDays = countWorkingDays(today, TARGET_DATE);
+    const workHours = workDays * HOURS_PER_WORK_DAY;
+    const calDays = calendarDaysBetween(today, TARGET_DATE);
+
+    // Animated number
+    const bn = document.getElementById('bigNumber');
+    bn.textContent = workDays;
+
+    // Pluralize
+    document.getElementById('bigUnit').textContent =
+      workDays === 1 ? 'day of work left' : 'days of work left';
+
+    document.getElementById('hoursLeft').textContent = workHours.toLocaleString();
+    document.getElementById('calDays').textContent = calDays;
+
+    // Progress
+    const totalSpanMs = TARGET_DATE - START_DATE;
+    const elapsedMs = now - START_DATE;
+    const pct = Math.max(0, Math.min(100, (elapsedMs / totalSpanMs) * 100));
+    document.getElementById('progressPct').textContent = pct.toFixed(0) + '%';
+    setTimeout(() => {
+      document.getElementById('progressFill').style.width = pct + '%';
+    }, 600);
+  }
+
+  render();
+  // Re-render every minute so the page stays fresh if left open
+  setInterval(render, 60 * 1000);
+</script>
+</body>
+</html>

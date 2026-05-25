@@ -1,0 +1,12 @@
+{
+  "name": "pregnancy-countdown",
+  "version": "1.0.0",
+  "description": "Daily countdown email to maternity leave",
+  "private": true,
+  "scripts": {
+    "send": "node send-email.js"
+  },
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  }
+}
